@@ -1,0 +1,119 @@
+create database BD_data
+go
+
+use BD_data
+go
+
+
+create table cargo 
+(
+idcargo int identity not null,
+nombrecargo varchar(100) primary key
+)
+go
+
+insert into cargo values ('asisten')
+insert into cargo values ('jefe')
+insert into cargo values ('gerente')
+
+create table area
+(
+idarea int identity not null,
+nombrearea varchar(100) primary key
+)
+go
+
+
+insert into area values ('marketing')
+insert into area values ('administracion')
+insert into area values ('gerencia')
+go
+create table usuario
+(
+idusuario int  identity not null,
+usuario varchar(100) primary key not null,
+contrasena varchar(100) not null,
+nombre varchar(100),
+nombrecargo varchar(100),
+nombrearea varchar(100),
+viaje varchar(20)
+)
+go
+
+
+alter table usuario
+add constraint fk_usuario_cargo
+foreign key (nombrecargo)
+references cargo(nombrecargo)
+
+alter table usuario
+add constraint fk_usuario_area
+foreign key (nombrearea)
+references area(nombrearea)
+go
+
+alter table usuario
+add constraint fk_usuario_logueo
+foreign key (usuario)
+references logueo(usuario)
+go
+
+create proc SP_Login
+	@usuario varchar(100),@contrasena varchar(100)
+	as
+	 begin
+	
+	 if exists (select nombre from usuario  where 
+	 usuario =@usuario)
+	 begin
+	 select CodError=0,Mensaje = usuario+ ' '+ nombre + ' ' + nombrecargo + ' ' + nombrearea + ' ' + viaje  from usuario   where  usuario =@usuario
+	 end
+	 else
+select CodError=1,Mensaje ='usuario y/o contraseña invalida' + @usuario
+end
+ go
+
+ exec SP_Login 'richard.com','12345'
+ go
+
+ CREATE PROCEDURE listar_usuario
+as
+begin 
+select usuario, contrasena from logueo
+end
+go
+
+
+CREATE Procedure insertar_usuario
+@usuario varchar(100),@contrasena varchar(100),
+    @nombre varchar(100),  
+    @nombrecargo varchar(100),  
+    @nombrearea varchar(100),  
+    @viaje varchar(20)
+    
+AS  
+INSERT INTO usuario
+           (  [usuario]  ,  [contrasena]  ,
+		   [nombre]  
+           ,[nombrecargo]  
+           ,[nombrearea]  
+           ,[viaje]  
+		   )
+     VALUES  
+           (@usuario,@contrasena,
+		   @nombre 
+           ,@nombrecargo 
+           ,@nombrearea
+           ,@viaje  
+          )
+
+		  exec insertar_usuario 'richard.com','12345','Richard','gerente','gerencia','si me ire'
+
+		  create procedure listar_todo
+		  as
+		  begin 
+		  select idusuario,usuario,contrasena, nombre, nombrecargo, nombrearea, viaje from usuario
+		  end 
+		  go
+
+		  exec listar_todo
